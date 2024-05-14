@@ -1,0 +1,83 @@
+{% extends "base.html" %} {% block title %} Home Page {% endblock %}
+{% block content %}
+<p>this is the home page</p>
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-6">
+            {% autoescape off %}
+                {{ plot_div }}
+            {% endautoescape %}
+        </div>
+        <div class="col-md-6">
+            {% autoescape off %}
+                {{ plot_div1 }}
+            {% endautoescape %}
+        </div>
+        <div class="col-md-6">
+            {% autoescape off %}
+                {{ plot_div2 }}
+            {% endautoescape %}
+        </div>
+        <div class="col-md-6">
+            {% autoescape off %}
+                {{ plot_div3 }}
+            {% endautoescape %}
+        </div>
+        <div class="col-md-6">
+            {% autoescape off %}
+                {{ plot_div4 }}
+            {% endautoescape %}
+        </div>
+        <div class="col-md-6">
+            {% autoescape off %}
+                {{ plot_div5 }}
+            {% endautoescape %}
+        </div>
+        <div class="col-md-6">
+            {% autoescape off %}
+                {{ plot_div6 }}
+            {% endautoescape %}
+        </div>
+        <div class="col-md-6">
+            {% autoescape off %}
+                {{ plot_div7 }}
+            {% endautoescape %}
+        </div>
+    </div>
+</div>
+{% comment %} <div class="container mt-3">
+    {% autoescape off %}
+        {{ plot_div }}
+    {% endautoescape %}
+</div>
+<div class="container mt-3">
+    {% autoescape off %}
+        {{ plot_div1 }}
+    {% endautoescape %}
+</div>
+<div class="container mt-3">
+    {% autoescape off %}
+        {{ plot_div2 }}
+    {% endautoescape %}
+</div>
+<div class="container mt-3">
+    {% autoescape off %}
+        {{ plot_div3 }}
+    {% endautoescape %}
+</div>
+<div class="container mt-3">
+    {% autoescape off %}
+        {{ plot_div4 }}
+    {% endautoescape %}
+</div>
+<div class="container mt-3">
+    {% autoescape off %}
+        {{ plot_div5 }}
+    {% endautoescape %}
+</div>
+<div class="container mt-3">
+    {% autoescape off %}
+        {{ plot_div6 }}
+    {% endautoescape %}
+</div> {% endcomment %}
+{% endblock %}
