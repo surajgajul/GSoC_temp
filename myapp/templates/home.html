@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block title %} Home Page {% endblock %}
 {% block content %}
-<p>this is the home page</p>
-<div class="container mt-3">
+    <p>this is the home page</p>
+{% comment %} <div class="container mt-3">
     <div class="row">
         <div class="col-md-6">
             {% autoescape off %}
@@ -44,40 +44,136 @@
             {% endautoescape %}
         </div>
     </div>
-</div>
-{% comment %} <div class="container mt-3">
-    {% autoescape off %}
-        {{ plot_div }}
-    {% endautoescape %}
-</div>
-<div class="container mt-3">
-    {% autoescape off %}
-        {{ plot_div1 }}
-    {% endautoescape %}
-</div>
-<div class="container mt-3">
-    {% autoescape off %}
-        {{ plot_div2 }}
-    {% endautoescape %}
-</div>
-<div class="container mt-3">
-    {% autoescape off %}
-        {{ plot_div3 }}
-    {% endautoescape %}
-</div>
-<div class="container mt-3">
-    {% autoescape off %}
-        {{ plot_div4 }}
-    {% endautoescape %}
-</div>
-<div class="container mt-3">
-    {% autoescape off %}
-        {{ plot_div5 }}
-    {% endautoescape %}
-</div>
-<div class="container mt-3">
-    {% autoescape off %}
-        {{ plot_div6 }}
-    {% endautoescape %}
 </div> {% endcomment %}
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-6" id="citywise-distribution"></div>
+        <div class="col-md-6" id="ratings-distribution"></div>
+        <div class="col-md-6" id="payment-method-distribution"></div>
+        <div class="col-md-6" id="income-chart"></div>
+        <div class="col-md-6" id="product-based-distribution"></div>
+        <div class="col-md-6" id="margin-chart"></div>
+        <div class="col-md-6" id="payment-method-distribution-by-city"></div>
+        <div class="col-md-6" id="samples-distribution-by-time"></div>
+    </div>
+</div>
+    <script>
+        function UpdateGraphs(){
+            // Fetch data from the Django REST API
+            fetch('/api/sales/')
+                .then(response => response.json())
+                .then(data => {
+                    // Prepare data for Plotly graphs
+                    const df = data;
+
+                    // Example for Citywise Distribution
+                    const cityCounts = {};
+                    df.forEach(sale => {
+                        cityCounts[sale.city] = (cityCounts[sale.city] || 0) + 1;
+                    });
+                    const cityData = [{
+                        type: 'pie',
+                        labels: Object.keys(cityCounts),
+                        values: Object.values(cityCounts),
+                        hole: .6
+                    }];
+                    Plotly.react('citywise-distribution', cityData, {title: 'Citywise Distribution'});
+
+                    // Example for Ratings Distribution
+                    const ratings = df.map(sale => sale.rating);
+                    const ratingData = [{
+                        type: 'histogram',
+                        x: ratings,
+                        nbinsx: 10
+                    }];
+                    Plotly.react('ratings-distribution', ratingData, {title: 'Ratings Distribution'});
+
+                    // Add more Plotly graphs as needed using the data
+                    // Example for Payment Method Distribution
+                    const paymentCounts = {};
+                    df.forEach(sale => {
+                        paymentCounts[sale.payment] = (paymentCounts[sale.payment] || 0) + 1;
+                    });
+                    const paymentData = [{
+                        type: 'pie',
+                        labels: Object.keys(paymentCounts),
+                        values: Object.values(paymentCounts)
+                    }];
+                    Plotly.react('payment-method-distribution', paymentData, {title: 'Payment Method Distribution'});
+
+                    // Example for Income Chart
+                    const incomeData = [{
+                        type: 'scatter',
+                        mode: 'markers',
+                        y: df.map(sale => sale.gross_income)
+                    }];
+                    Plotly.react('income-chart', incomeData, {title: 'Income Chart'});
+
+                    // Example for Product based distribution
+                    const productCounts = {};
+                    df.forEach(sale => {
+                        productCounts[sale.product_line] = (productCounts[sale.product_line] || 0) + 1;
+                    });
+                    const productData = [{
+                        type: 'bar',
+                        x: Object.keys(productCounts),
+                        y: Object.values(productCounts)
+                    }];
+                    Plotly.react('product-based-distribution', productData, {title: 'Product based distribution'});
+
+                    // Example for Margin Chart
+                    const marginData = [{
+                        type: 'line',
+                        y: df.map(sale => sale.total)
+                    }];
+                    Plotly.react('margin-chart', marginData, {title: 'Margin Chart'});
+
+                    // Example for Payment Method Distribution by City
+                    const cityPaymentCounts = {};
+                    df.forEach(sale => {
+                        if (!cityPaymentCounts[sale.city]) {
+                            cityPaymentCounts[sale.city] = {};
+                        }
+                        cityPaymentCounts[sale.city][sale.payment] = (cityPaymentCounts[sale.city][sale.payment] || 0) + 1;
+                    });
+                    const paymentByCityData = [];
+                    Object.keys(cityPaymentCounts).forEach(city => {
+                        paymentByCityData.push({
+                            type: 'bar',
+                            name: city,
+                            x: Object.keys(cityPaymentCounts[city]),
+                            y: Object.values(cityPaymentCounts[city])
+                        });
+                    });
+                    Plotly.react('payment-method-distribution-by-city', paymentByCityData, {title: 'Payment Method Distribution by City', barmode: 'group'});
+
+                    // Example for Samples Distribution by Time of Day in Each City
+                    const timeCategoryCounts = {};
+                    df.forEach(sale => {
+                        const timeCategory = new Date(`1970-01-01T${sale.time}`).getHours() < 12 ? 'Before Noon' : 'After Noon';
+                        if (!timeCategoryCounts[sale.city]) {
+                            timeCategoryCounts[sale.city] = { 'Before Noon': 0, 'After Noon': 0 };
+                        }
+                        timeCategoryCounts[sale.city][timeCategory] += 1;
+                    });
+                    const timeCategoryData = [];
+                    Object.keys(timeCategoryCounts).forEach(city => {
+                        Object.keys(timeCategoryCounts[city]).forEach(category => {
+                            timeCategoryData.push({
+                                type: 'bar',
+                                name: `${city} - ${category}`,
+                                x: [city],
+                                y: [timeCategoryCounts[city][category]],
+                                text: category,
+                                hoverinfo: 'text+y'
+                            });
+                        });
+                    });
+                    Plotly.react('samples-distribution-by-time', timeCategoryData, {title: 'Samples Distribution by Time of Day in Each City', barmode: 'group'});
+                });
+        }
+        UpdateGraphs();
+
+        setInterval(UpdateGraphs, 5000)
+    </script>
 {% endblock %}
