@@ -20,3 +20,7 @@ class Sales(models.Model):
     gross_margin_percentage = models.FloatField()
     gross_income = models.FloatField()
     rating = models.FloatField()
+
+class Worldmap(models.Model):
+    country = models.CharField(max_length=50)
+    sales = models.IntegerField()
